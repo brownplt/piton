@@ -1,0 +1,27 @@
+-----
+Piton
+-----
+
+Formal models for identity- and capability-based reasoning on the web.
+
+Files:
+
+naturals.als
+
+  Describes natural numbers (used to represent time)
+
+caps.als
+
+  The main definitions of capability-based interactions.  Defines what
+  a CapServer is, and the various operations that can be performed on
+  one.
+
+examples.als
+
+  Sanity tests for caps.als.  Ensures that the various operations can
+  be performed, and will have more basic assertions added.
+
+echo-server.als
+
+  Defines a server that responds to all invocations with exactly the
+  arguments that were supplied.
