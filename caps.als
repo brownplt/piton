@@ -38,6 +38,13 @@ fact StepsHaveUniqueLocations {
   }
 }
 
+//A CapServer knows all its owned nonces
+fact ServersKnowOwnedCaps {
+  all n:Nonce,s:CapServer {
+    n in s.ownedCaps implies n in s.knownCaps
+  }
+}
+
 // OnlyTransitionsChangeStep is an important fact, and should be
 // carefully scrutinized.  It is an attempt to ensure that only
 // well-defined transitions can change the state of a CapServer.  It
@@ -101,10 +108,17 @@ pred invoke[invoker, invoker', invokee, invokee': CapServer,
   inNextStep[invoker, invoker']
   sameLocationAndImplementation[invokee, invokee']
   inNextStep[invokee, invokee']
+  invoker.location = invokee.location implies invoker.step = invokee.step
 
+  invokee'.ownedCaps = invokee.ownedCaps
+  invoker'.ownedCaps = invoker.ownedCaps
   invokee'.knownCaps = invokee.knownCaps + invokeNonce + args.nonces
   invoker'.knownCaps = invoker.knownCaps +
     (invokee.implementation[invokeNonce][args])
+  invokeNonce in invoker.knownCaps
+  all n:Nonce {
+    n in args.nonces implies n in invoker.knownCaps
+  }
 }
 
 pred changeImplementation[server, server':CapServer] {

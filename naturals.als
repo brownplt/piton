@@ -9,8 +9,7 @@ fact {
   all n:Natural | not (n in n.^next)
   // If it has a next, it has a predecessor, unless its Zero
   all n:Natural {
-    (some n':Natural | n' in n.next) implies
-     ((some n'':Natural | n in n''.next) or n = Zero)
+    ((some n'':Natural | n in n''.next) or n = Zero)
   }
 }
 one sig Zero in Natural {}
@@ -22,3 +21,6 @@ fact {
   Four in Three.next
   Five in Four.next
 }
+
+pred example {}
+run example for exactly 10 Natural
