@@ -7,7 +7,7 @@ sig Location { }
 // understand, about being unable to skolemize, if I use "set Nonce"
 // in CapServer.implementation below.
 sig NonceSet {
-  nonces: set Nonce
+  nonces: seq Nonce
 }
 sig CapServer {
   // Real-world analog:  A domain (www.google.com)
@@ -104,9 +104,13 @@ pred grant[server, server':CapServer, nonce: Nonce] {
 
 pred invoke[invoker, invoker', invokee, invokee': CapServer,
             invokeNonce:Nonce, args: NonceSet] {
-  sameLocationAndImplementation[invoker, invoker']
+	//implementations should be able to change during an invoke
+	//a server gets info, so it need to be able to respond to the info
+  //sameLocationAndImplementation[invoker, invoker']
+	invoker.location = invoker'.location
   inNextStep[invoker, invoker']
-  sameLocationAndImplementation[invokee, invokee']
+  //sameLocationAndImplementation[invokee, invokee']
+	invokee.location = invokee'.location
   inNextStep[invokee, invokee']
   //if you are invoking a nonce on yourself, you can only interact with the present you
   invoker.location = invokee.location implies invoker.step = invokee.step
@@ -114,15 +118,17 @@ pred invoke[invoker, invoker', invokee, invokee': CapServer,
   //neither server can forget nonces during an invoke
   invokee.ownedCaps in invokee'.ownedCaps
   invoker.ownedCaps in invoker'.ownedCaps
-  invokee'.knownCaps = invokee.knownCaps + invokeNonce + args.nonces
+  invokee'.knownCaps = invokee.knownCaps + invokeNonce + univ.(args.nonces)
+	//use the later invokee's implementation
+	//it gives the invokee a chance to react to the invocation
   invoker'.knownCaps = invoker.knownCaps +
-    (invokee.implementation[invokeNonce][args])
+    (invokee'.implementation[invokeNonce][args])
   //the invoker should know all the nonces it is passing
   invokeNonce in invoker.knownCaps
   all n:Nonce {
-    n in args.nonces implies n in invoker.knownCaps
+    n in univ.(args.nonces) implies n in invoker.knownCaps
     //the invokee should know all the nonces it is returning
-    n in (invokee.implementation[invokeNonce][args].nonces) implies n in invokee.knownCaps
+    n in univ.(invokee.implementation[invokeNonce][args].nonces) implies n in invokee.knownCaps
   }
 }
 

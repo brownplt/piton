@@ -19,14 +19,14 @@ pred NoGrantedAccess(l:Location) {
   //all servers at l don't return an owned nonce
   all server:CapServer {
     (server.location = l) implies
-    all n,n':Nonce, ns:NonceSet {
-      (n' in server.implementation[n][ns].nonces) implies (n' not in server.ownedCaps)
+    all n,n':Nonce, ns:NonceSet, i:Int {
+      (i->n' in server.implementation[n][ns].nonces) implies (n' not in server.ownedCaps)
     }
   }
   //all servers at l don't use an owned nonce in an invocation
   all n,n':Nonce, ns:NonceSet, invoker,invoker',invokee,invokee':CapServer {
     (invoker.location = l and n in invoker.ownedCaps and
-    invoke[invoker,invoker',invokee,invokee',n',ns]) implies (not (n = n' or n in ns.nonces))
+    invoke[invoker,invoker',invokee,invokee',n',ns]) implies (not (n = n' or n in univ.(ns.nonces)))
   }
 }
 
